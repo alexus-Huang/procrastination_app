@@ -89,8 +89,14 @@ pomodoro_btn.pack()
 
 
 #focus mode
+def focus_mode():
+    root.attributes("-fullscreen",True)
+def stop_focus_mode(event=None):
+    root.attributes("-fullscreen",False)
+root.bind("<Escape>",stop_focus_mode)
 
-
+focus_btn = tk.Button(root, text="Focus",font=("Arial",20),command=focus_mode)
+focus_btn.pack(padx=5)
 
 # main page 
 

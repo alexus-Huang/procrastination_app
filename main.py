@@ -91,7 +91,7 @@ pomodoro_btn.pack()
 #focus mode
 def focus_mode():
     root.attributes("-fullscreen",True)
-def stop_focus_mode(event=None):
+def stop_focus_mode(event=None  ):
     root.attributes("-fullscreen",False)
 root.bind("<Escape>",stop_focus_mode)
 
@@ -108,6 +108,14 @@ def add_task():
     task_frame = tk.Frame(task_container, bg="lightgray",pady=5)
     task_frame.pack(fill="x",padx=10,pady=5)
 
+    completed = tk.BooleanVar()
+    checkbox = tk.Checkbutton(
+        task_frame,
+        variable=completed,
+        bg="lightgray"
+    )
+    checkbox.pack(side="left",padx=5)
+    
     task_label = tk.Label(
         task_frame,
         text=task_text,
@@ -116,6 +124,7 @@ def add_task():
         anchor="w"
     )
     task_label.pack(side="left",padx=10)
+
 
     delete_button = tk.Button(
         task_frame,

@@ -4,58 +4,96 @@ root = tk.Tk()
 root.minsize(1000,500)
 
 
+# popup windows
+#pomodoro timer
 timer_on = False
-current_time = 1 * 60
+timer = 1 * 60
 
-break_time = False
-break_time = 5 * 60
+is_break_time = False
+break_timer = 1 * 60
 
-timer_label = tk.Label(root, text="25:00", font=("Helvetica",48))
-timer_label.pack(pady=20)
-
-break_label = tk.Label(root, text="5:00",font=("Helvetica",24))
-break_label.pack(pady=20)
-
-# pomodoro timer
-def start_timer():
-    global timer_on
-    if not timer_on:
-        count_down_timer(current_time)
-
-def stop_timer():
+#studying functions
+def start_studying_time(timer_label,pomodoro_popup):
     global timer_on
     if timer_on:
-        root.after_cancel(timer_on)
-        timer_on = False
+        return
+    timer_on = True
+    update_study_time(timer_label,pomodoro_popup)
 
-def start_break():
-    global break_time
-    if not break_time:
-        count_down_break(break_time)
-
-def count_down_timer(count):
-    global current_time, timer_on
-
-    mins = count // 60
-    secs = count % 60
-
-    timer_label.config(text=f"{mins:02d}:{secs:02d}")
-
-    if count > 0:
-        current_sec = count
-        timer_on = root.after(1000, count_down_timer, count - 1)
+def update_study_time(timer_label,pomodoro_popup):
+    global timer_on, timer
+    if timer_on and timer > 0:
+        timer -=1
+        minutes = timer // 60
+        seconds = timer % 60
+        timer_label.config(text=f"Study time    {minutes}:{seconds:02d}")
+        pomodoro_popup.after(1000, lambda: update_study_time(timer_label, pomodoro_popup))
     else:
         timer_on = False
-        print("Time's up!")
+        
+def stop_studying_time():
+    global timer_on
+    timer_on = False
 
-def count_down_break(count):
-    pass
 
-start_timer_btn = tk.Button(root,text="Start",command=start_timer,font=("Helvetica",24))
-start_timer_btn.pack(pady=20)
+#break functions
+def start_break_time(break_label,pomodoro_popup):
+    global is_break_time
+    if is_break_time:
+        return
+    is_break_time = True
+    update_break_time(break_label,pomodoro_popup)
 
-stop_timer_btn = tk.Button(root,text="Stop",command=stop_timer,font=("Helvetica",24))
-stop_timer_btn.pack(pady=10)
+def update_break_time(break_label,pomodoro_popup):
+    global is_break_time, break_timer
+    if is_break_time and break_timer > 0:
+        break_timer-=1
+        minutes = break_timer // 60
+        seconds = break_timer % 60
+        break_label.config(text=f"Break time    {minutes}:{seconds:02d}")
+        pomodoro_popup.after(1000,lambda: update_break_time(break_label, pomodoro_popup))
+    else:
+        is_break_time = False
+
+def stop_break_time():
+    global is_break_time
+    is_break_time = False
+
+def pomodoro_window():
+    pomodoro_popup = tk.Toplevel(root)
+    pomodoro_popup.title("Pomodoro Timer")
+    pomodoro_popup.minsize(1000,500)
+
+    #labels
+    timer_label = tk.Label(pomodoro_popup,text="Study time   1:00",font=("Helvetica",24))
+    timer_label.pack(pady=20)
+
+    break_label = tk.Label(pomodoro_popup,text="Break time   1:00",font=("Helvetica",24))
+    break_label.pack(pady=20)
+
+    #buttons
+    start_timer = tk.Button(pomodoro_popup,text="Start Studying",command= lambda: start_studying_time(timer_label,pomodoro_popup))
+    start_timer.pack(side="left",padx=5)
+
+    stop_timer = tk.Button(pomodoro_popup,text="Stop Studying",command=stop_studying_time)
+    stop_timer.pack(side="left",padx=5)
+
+    start_break = tk.Button(pomodoro_popup, text="Start Break",command= lambda: start_break_time(break_label,pomodoro_popup))
+    start_break.pack(side="left",padx=5)
+
+    stop_break = tk.Button(pomodoro_popup, text="Stop Break", command=stop_break_time)
+    stop_break.pack(side="left",padx=5)
+
+pomodoro_btn = tk.Button(root, text="Pomodoro",command=pomodoro_window)
+pomodoro_btn.pack()
+
+
+#focus mode
+
+
+
+# main page 
+
 # task list
 
 #daily streak system
@@ -64,9 +102,7 @@ stop_timer_btn.pack(pady=10)
 
 # statistics dashboard
 
+# background
 #distraction punishment system
-
-#focus mode
-
 #animated UI
 root.mainloop()

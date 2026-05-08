@@ -95,7 +95,46 @@ pomodoro_btn.pack()
 # main page 
 
 # task list
+def add_task():
+    task_text = entry.get() # get user's text
+    if task_text.strip() == "":
+        return
+    task_frame = tk.Frame(task_container, bg="lightgray",pady=5)
+    task_frame.pack(fill="x",padx=10,pady=5)
 
+    task_label = tk.Label(
+        task_frame,
+        text=task_text,
+        bg="lightgray",
+        font=("Arial",14),
+        anchor="w"
+    )
+    task_label.pack(side="left",padx=10)
+
+    delete_button = tk.Button(
+        task_frame,
+        text="x",
+        fg="red",
+        command=task_frame.destroy
+    )
+    delete_button.pack(side="right",padx=10)
+    entry.delete(0,tk.END)
+
+top_frame = tk.Frame(root)
+top_frame.pack(pady=20)
+
+entry = tk.Entry(top_frame,width=25,font=("Arial",14))
+entry.pack(side="left",padx=5)
+
+add_button = tk.Button(
+    top_frame,
+    text="Add Task",
+    command=add_task
+)
+add_button.pack(side="left")
+
+task_container = tk.Frame(root)
+task_container.pack(fill="both",expand=True)
 #daily streak system
 
 #xp / leveling system

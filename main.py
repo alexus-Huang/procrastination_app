@@ -1,5 +1,21 @@
 import tkinter as tk
 import math
+import json
+import os
+# user data
+DATA_FILE = "save_data.json"
+def load_data():
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r") as f:
+            return json.load(f)
+    return {"xp":0, "level":1,"total_tasks":0}
+
+def save_data(data):
+    with open(DATA_FILE, "w") as f:
+        json.dump(data,f,indent=4)
+
+user_stats = load_data()
+
 root = tk.Tk()
 root.minsize(1000,500)
 
@@ -89,10 +105,15 @@ pomodoro_btn.pack()
 
 
 #focus mode
+focus_label = tk.Label(root,text="")
+focus_label.pack(padx=5,pady=5)
 def focus_mode():
     root.attributes("-fullscreen",True)
+    focus_label.config(text="FOCUS MODE IS ON - ESC TO EXIT",font=("Arial",20))
+
 def stop_focus_mode(event=None  ):
     root.attributes("-fullscreen",False)
+    focus_label.config(text="")
 root.bind("<Escape>",stop_focus_mode)
 
 focus_btn = tk.Button(root, text="Focus",font=("Arial",20),command=focus_mode)
@@ -108,14 +129,23 @@ def add_task():
     task_frame = tk.Frame(task_container, bg="lightgray",pady=5)
     task_frame.pack(fill="x",padx=10,pady=5)
 
+    def on_check():
+        if completed.get():
+            add_xp(20)
+            task_label.config(fg="gray")
+        else:
+            save_data(user_stats)
+            update_ui()
+
     completed = tk.BooleanVar()
     checkbox = tk.Checkbutton(
         task_frame,
         variable=completed,
-        bg="lightgray"
+        bg="lightgray",
+        command=on_check
     )
     checkbox.pack(side="left",padx=5)
-    
+
     task_label = tk.Label(
         task_frame,
         text=task_text,
@@ -153,7 +183,31 @@ task_container.pack(fill="both",expand=True)
 #daily streak system
 
 #xp / leveling system
+def add_xp(amount):
+    global user_stats
+    user_stats["xp"] += amount
 
+    xp_needed = user_stats["level"] * 100
+
+    if user_stats["xp"] >= xp_needed:
+        user_stats["xp"] -= xp_needed
+        user_stats["level"] +=1
+        print(f"Level Up! Now level {user_stats["level"]}")
+    save_data(user_stats)
+    update_ui()
+
+stats_frame = tk.Frame(root)
+stats_frame.pack(pady=10)
+
+level_display = tk.Label(stats_frame,text=f"Level: {user_stats["level"]}",font=("Arial",14,"bold"))
+level_display.pack(side="left",padx=20)
+
+xp_display = tk.Label(stats_frame,text=f"XP: {user_stats["xp"]} / {user_stats["level"] * 100}", font=("Arial",12))
+xp_display.pack(side="left")
+
+def update_ui():
+    level_display.config(text=f"Level: {user_stats["level"]}")
+    xp_display.config(text=f"XP: {user_stats["xp"]} / {user_stats["level"] * 100}")
 # statistics dashboard
 
 # background

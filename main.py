@@ -19,7 +19,6 @@ user_stats = load_data()
 root = tk.Tk()
 root.minsize(1000,500)
 
-
 # popup windows
 #pomodoro timer
 timer_on = False
@@ -50,7 +49,6 @@ def update_study_time(timer_label,pomodoro_popup):
 def stop_studying_time():
     global timer_on
     timer_on = False
-
 
 #break functions
 def start_break_time(break_label,pomodoro_popup):
@@ -134,6 +132,8 @@ def add_task():
             add_xp(20)
             task_label.config(fg="gray")
         else:
+            add_xp(-20)
+            task_label.config(fg="black")
             save_data(user_stats)
             update_ui()
 
@@ -154,7 +154,6 @@ def add_task():
         anchor="w"
     )
     task_label.pack(side="left",padx=10)
-
 
     delete_button = tk.Button(
         task_frame,
@@ -208,12 +207,10 @@ xp_display.pack(side="left")
 def update_ui():
     level_display.config(text=f"Level: {user_stats["level"]}")
     xp_display.config(text=f"XP: {user_stats["xp"]} / {user_stats["level"] * 100}")
+
 # statistics dashboard
 
 # background
 #distraction punishment system
 #animated UI
 root.mainloop()
-
-# bug list
-# for xp / level system, the user can spam one task to gain xp - fix

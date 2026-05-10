@@ -214,3 +214,6 @@ def update_ui():
 #distraction punishment system
 #animated UI
 root.mainloop()
+
+# bug list
+# for xp / level system, the user can spam one task to gain xp - fix

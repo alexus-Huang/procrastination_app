@@ -2,6 +2,7 @@ import tkinter as tk
 import math
 import json
 import os
+import datetime
 # user data
 DATA_FILE = "save_data.json"
 def load_data():
@@ -16,6 +17,19 @@ def save_data(data):
 
 user_stats = load_data()
 
+# Daily Streak System
+DAILY_STREAK_DATA_FILE = "daily_streak_data.json"
+def load_daily_streak_data():
+    if os.path.exists(DAILY_STREAK_DATA_FILE):
+        with open(DAILY_STREAK_DATA_FILE, "r") as daily_streak_file:
+            return json.load(daily_streak_file)
+    return {"consecutive_days": 0, "last_login": None}
+
+def save_daily_login(data):
+    with open(DAILY_STREAK_DATA_FILE, "w") as daily_streak_file:
+        json.dump(data, daily_streak_file, indent=4)
+
+user_daily_login = load_daily_streak_data()
 root = tk.Tk()
 root.minsize(1000,500)
 
@@ -179,9 +193,53 @@ add_button.pack(side="left")
 
 task_container = tk.Frame(root)
 task_container.pack(fill="both",expand=True)
-#daily streak system
 
-#xp / leveling system
+#daily streak system
+checkin_frame = tk.Frame(root)
+checkin_frame.pack(pady=5)
+
+def add_days(logged_in):
+    global user_daily_login
+    user_daily_login["consecutive_days"] += logged_in # when the user checks the checkbox, update days
+    save_daily_login(user_daily_login)
+    update_daily_log_in_ui()
+
+daily_log_in_frame = tk.Frame(root)
+daily_log_in_frame.pack(pady=10)
+
+daily_log_in_streak_display = tk.Label(daily_log_in_frame, text=f"Log In Streak: {user_daily_login["consecutive_days"]}",font=("Arial",14,"bold"))
+daily_log_in_streak_display.pack(side="left",padx=20)
+
+def update_daily_log_in_ui():
+    daily_log_in_streak_display.config(text=f"Log In Streak: {user_daily_login["consecutive_days"]}")
+
+
+def check_streak():
+    today_date = str(datetime.date.today())
+    last = user_daily_login.get("last_login")
+
+    if today_date == last:
+        checkin_frame.pack_forget()
+    elif last == str(datetime.date.today() - datetime.timedelta(days=1)):
+        pass # show checkbox since streak is still going
+    else:
+        user_daily_login["consecutive_days"] = 0 # user missed a day, reset streak
+
+def on_checkin():
+    user_daily_login["last_login"] = str(datetime.date.today())
+    user_daily_login["consecutive_days"] +=1
+    save_daily_login(user_daily_login)
+    checkin_frame.pack_forget() # hide checkbox after log in
+
+checkin_var = tk.BooleanVar()
+checkin_checkbox = tk.Checkbutton(
+    checkin_frame,
+    variable=checkin_var,
+    command=on_checkin
+)
+checkin_checkbox.pack()
+
+# XP / Leveling System
 def add_xp(amount):
     global user_stats
     user_stats["xp"] += amount

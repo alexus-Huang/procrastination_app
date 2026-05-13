@@ -3,6 +3,7 @@ import math
 import json
 import os
 import datetime
+
 # user data
 DATA_FILE = "save_data.json"
 def load_data():
@@ -16,6 +17,21 @@ def save_data(data):
         json.dump(data,f,indent=4)
 
 user_stats = load_data()
+
+# Historical Data ( for stats )
+HISTORY_FILE = "history_data.json"
+
+def load_history():
+    if os.path.exists(HISTORY_FILE):
+        with open(HISTORY_FILE, "r") as f:
+            return json.load(f)
+    return {"xp_history": {}, "tasks_history": {}}
+
+def save_history(data):
+    with open(HISTORY_FILE,"w") as f:
+        json.dump(data,f,indent=4)
+
+history_data = load_history()
 
 # Daily Streak System
 DAILY_STREAK_DATA_FILE = "daily_streak_data.json"
@@ -138,7 +154,7 @@ def focus_mode():
     root.attributes("-fullscreen",True)
     focus_label.config(text="FOCUS MODE IS ON - ESC TO EXIT",font=("Arial",20))
 
-def stop_focus_mode(event=None  ):
+def stop_focus_mode(event=None):
     root.attributes("-fullscreen",False)
     focus_label.config(text="")
 root.bind("<Escape>",stop_focus_mode)
@@ -149,7 +165,7 @@ focus_btn.pack(padx=5)
 # main page 
 # task list
 def add_task():
-    task_text = entry.get() # get user's text
+    task_text = entry.get()
     if task_text.strip() == "":
         return
     task_frame = tk.Frame(task_container, bg="lightgray",pady=5)
@@ -159,6 +175,9 @@ def add_task():
         if completed.get():
             add_xp(20)
             task_label.config(fg="gray")
+            today = str(datetime.date.today())
+            history_data["tasks_history"][today] = history_data["tasks_history"].get(today,0) + 1
+            save_history(history_data)
         else:
             add_xp(-20)
             task_label.config(fg="black")
@@ -214,36 +233,38 @@ checkin_frame.pack(pady=5)
 
 def add_days(logged_in):
     global user_daily_login
-    user_daily_login["consecutive_days"] += logged_in # when the user checks the checkbox, update days
+    user_daily_login["consecutive_days"] += logged_in
     save_daily_login(user_daily_login)
     update_daily_log_in_ui()
 
 daily_log_in_frame = tk.Frame(root)
 daily_log_in_frame.pack(pady=10)
 
-daily_log_in_streak_display = tk.Label(daily_log_in_frame, text=f"Log In Streak: {user_daily_login["consecutive_days"]}",font=("Arial",14,"bold"))
+daily_log_in_streak_display = tk.Label(daily_log_in_frame, text=f"Log In Streak: {user_daily_login['consecutive_days']}",font=("Arial",14,"bold"))
 daily_log_in_streak_display.pack(side="left",padx=20)
 
 def update_daily_log_in_ui():
-    daily_log_in_streak_display.config(text=f"Log In Streak: {user_daily_login["consecutive_days"]}")
+    daily_log_in_streak_display.config(text=f"Log In Streak: {user_daily_login['consecutive_days']}")
 
 def check_streak():
     today_date = str(datetime.date.today())
     last = user_daily_login.get("last_login")
-
     if today_date == last:
         checkin_frame.pack_forget()
     elif last == str(datetime.date.today() - datetime.timedelta(days=1)):
-        pass # show checkbox since streak is still going
+        pass
     else:
-        user_daily_login["consecutive_days"] = 0 # user missed a day, reset streak
+        user_daily_login["consecutive_days"] = 0
 
 def on_checkin():
-    user_daily_login["last_login"] = str(datetime.date.today())
-    user_daily_login["consecutive_days"] +=1
+    today = str(datetime.date.today())
+    if user_daily_login["last_login"] == today:
+        return
+    user_daily_login["last_login"] = today
+    user_daily_login["consecutive_days"] += 1
     save_daily_login(user_daily_login)
     update_daily_log_in_ui()
-    checkin_frame.pack_forget() # hide checkbox after log in
+    checkin_frame.pack_forget()
 
 checkin_var = tk.BooleanVar()
 checkin_checkbox = tk.Checkbutton(
@@ -253,41 +274,87 @@ checkin_checkbox = tk.Checkbutton(
 )
 checkin_checkbox.pack()
 check_streak()
+
 # XP / Leveling System
 def add_xp(amount):
     global user_stats
     user_stats["xp"] += amount
-
     xp_needed = user_stats["level"] * 100
-
     if user_stats["xp"] >= xp_needed:
         user_stats["xp"] -= xp_needed
-        user_stats["level"] +=1
-        print(f"Level Up! Now level {user_stats["level"]}")
+        user_stats["level"] += 1
+        print(f"Level Up! Now level {user_stats['level']}")
     save_data(user_stats)
     update_ui()
+    today = str(datetime.date.today())
+    if amount > 0:
+        history_data["xp_history"][today] = history_data["xp_history"].get(today,0) + amount
+        save_history(history_data)
 
 stats_frame = tk.Frame(root)
 stats_frame.pack(pady=10)
 
-level_display = tk.Label(stats_frame,text=f"Level: {user_stats["level"]}",font=("Arial",14,"bold"))
+level_display = tk.Label(stats_frame,text=f"Level: {user_stats['level']}",font=("Arial",14,"bold"))
 level_display.pack(side="left",padx=20)
 
-xp_display = tk.Label(stats_frame,text=f"XP: {user_stats["xp"]} / {user_stats["level"] * 100}", font=("Arial",12))
+xp_display = tk.Label(stats_frame,text=f"XP: {user_stats['xp']} / {user_stats['level'] * 100}", font=("Arial",12))
 xp_display.pack(side="left")
 
 def update_ui():
-    level_display.config(text=f"Level: {user_stats["level"]}")
-    xp_display.config(text=f"XP: {user_stats["xp"]} / {user_stats["level"] * 100}")
+    level_display.config(text=f"Level: {user_stats['level']}")
+    xp_display.config(text=f"XP: {user_stats['xp']} / {user_stats['level'] * 100}")
 
 # statistics dashboard
 def statistics_popup():
-    print("stats popup window")
+    import matplotlib.pyplot as plt
+    from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+    stats_window = tk.Toplevel(root)
+    stats_window.title("Statistics")
+    stats_window.minsize(1000, 600)
+
+    fig, (ax1,ax2,ax3) = plt.subplots(1, 3, figsize=(14,4))
+    fig.tight_layout(pad=4.0)
+
+    # XP Data
+    xp_data = history_data["xp_history"]
+    if xp_data:
+        dates = list(xp_data.keys())
+        xp_values = list(xp_data.values())
+        ax1.plot(dates,xp_values,marker="o",color="blue")
+        ax1.set_title("XP Earned Over Time")
+        ax1.set_xlabel("Date")
+        ax1.set_ylabel("XP")
+        ax1.tick_params(axis="x", rotation=45)
+    else:
+        ax1.text(0.5, 0.5, "No data yet", ha="center", va="center")
+        ax1.set_title("XP Earned Over Time")
+
+    # Tasks completed per day
+    tasks_data = history_data["tasks_history"]
+    if tasks_data:
+        dates = list(tasks_data.keys())
+        task_values = list(tasks_data.values())
+        ax2.bar(dates, task_values, color="green")
+        ax2.set_title("Tasks Completed Per Day")
+        ax2.set_xlabel("Date")
+        ax2.set_ylabel("Tasks")
+        ax2.tick_params(axis="x", rotation=45)
+    else:
+        ax2.text(0.5, 0.5, "No data yet", ha="center", va="center")
+        ax2.set_title("Tasks Completed Per Day")
+
+    # Login streak
+    ax3.plot(["Current Streak"], [user_daily_login["consecutive_days"]], marker="o", color="orange")
+    ax3.set_title("Login Streak")
+    ax3.set_ylabel("Days")
+
+    # embed in tkinter
+    canvas = FigureCanvasTkAgg(fig, master=stats_window)
+    canvas.draw()
+    canvas.get_tk_widget().pack(fill="both", expand=True)
 
 statistics_btn = tk.Button(root,text="Stats",font=("Helvetica",14),command=statistics_popup)
 statistics_btn.pack(side="right",padx=5)
-# background
-#distraction punishment system
 
-#animated UI
 root.mainloop()

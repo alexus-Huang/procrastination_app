@@ -229,6 +229,7 @@ def on_checkin():
     user_daily_login["last_login"] = str(datetime.date.today())
     user_daily_login["consecutive_days"] +=1
     save_daily_login(user_daily_login)
+    update_daily_log_in_ui()
     checkin_frame.pack_forget() # hide checkbox after log in
 
 checkin_var = tk.BooleanVar()
@@ -270,5 +271,6 @@ def update_ui():
 
 # background
 #distraction punishment system
+
 #animated UI
 root.mainloop()

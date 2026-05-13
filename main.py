@@ -371,7 +371,7 @@ def check_distractions():
         distraction_punished = False
         return
     
-    allowed_titles = [root.title().lower(),"Pomodoro Timer"]
+    allowed_titles = [root.title().lower(),"pomodoro timer"]
     active_window = gw.getActiveWindow() # Gets the user's current window
     print(active_window.title)
     if active_window is not None:
@@ -384,7 +384,7 @@ def check_distractions():
                 #popup warning to the user
                 warning = tk.Toplevel(root)
                 warning.title("DISTRACTION DETECTED")
-                tk.Label(warning,text="You switched away during study time!\n-20 XP",font=("Helvetica",18))
+                tk.Label(warning,text="You switched away during study time!\n-20 XP",font=("Helvetica",18)).pack(pady=20)
                 tk.Button(warning,text="OK",command=warning.destroy).pack(pady=10)
         else:
             distraction_punished = False # switched back, reset punishment system function

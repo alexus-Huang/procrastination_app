@@ -3,7 +3,8 @@ import math
 import json
 import os
 import datetime
-
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 # user data
 DATA_FILE = "save_data.json"
 def load_data():
@@ -306,8 +307,6 @@ def update_ui():
 
 # statistics dashboard
 def statistics_popup():
-    import matplotlib.pyplot as plt
-    from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
     stats_window = tk.Toplevel(root)
     stats_window.title("Statistics")

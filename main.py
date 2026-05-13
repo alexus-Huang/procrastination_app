@@ -252,7 +252,7 @@ checkin_checkbox = tk.Checkbutton(
     command=on_checkin
 )
 checkin_checkbox.pack()
-
+check_streak()
 # XP / Leveling System
 def add_xp(amount):
     global user_stats

@@ -371,17 +371,21 @@ def check_distractions():
         distraction_punished = False
         return
     
+    allowed_titles = [root.title().lower(),"Pomodoro Timer"]
     active_window = gw.getActiveWindow() # Gets the user's current window
+    print(active_window.title)
     if active_window is not None:
-        if root.title().lower() not in active_window.title.lower():
-            distraction_punished = True
-            add_xp(-20)
+        if not any(t in active_window.title.lower() for t in allowed_titles):
+            if not distraction_punished:
+                distraction_punished = True
+                
+                add_xp(-20)
 
-            #popup warning to the user
-            warning = tk.Toplevel(root)
-            warning.title("DISTRACTION DETECTED")
-            tk.Label(warning,text="You switched away during study time!\n-20 XP",font=("Helvetica",18))
-            tk.Button(warning,text="OK",command=warning.destroy).pack(pady=10)
+                #popup warning to the user
+                warning = tk.Toplevel(root)
+                warning.title("DISTRACTION DETECTED")
+                tk.Label(warning,text="You switched away during study time!\n-20 XP",font=("Helvetica",18))
+                tk.Button(warning,text="OK",command=warning.destroy).pack(pady=10)
         else:
             distraction_punished = False # switched back, reset punishment system function
     
@@ -391,5 +395,4 @@ def check_distractions():
 def streak_damage():
     add_xp(-15)   
 
-root.title("Procrastination App")
 root.mainloop()

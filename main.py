@@ -92,7 +92,6 @@ def pause_break_time():
     global is_break_time
     is_break_time = False
 
-
 def reset_break_time(break_label):
     global break_timer
     break_timer = 1 * 60
@@ -132,7 +131,6 @@ def pomodoro_window():
 pomodoro_btn = tk.Button(root, text="Pomodoro",command=pomodoro_window)
 pomodoro_btn.pack()
 
-
 #focus mode
 focus_label = tk.Label(root,text="")
 focus_label.pack(padx=5,pady=5)
@@ -149,7 +147,6 @@ focus_btn = tk.Button(root, text="Focus",font=("Arial",20),command=focus_mode)
 focus_btn.pack(padx=5)
 
 # main page 
-
 # task list
 def add_task():
     task_text = entry.get() # get user's text
@@ -230,7 +227,6 @@ daily_log_in_streak_display.pack(side="left",padx=20)
 def update_daily_log_in_ui():
     daily_log_in_streak_display.config(text=f"Log In Streak: {user_daily_login["consecutive_days"]}")
 
-
 def check_streak():
     today_date = str(datetime.date.today())
     last = user_daily_login.get("last_login")
@@ -285,7 +281,11 @@ def update_ui():
     xp_display.config(text=f"XP: {user_stats["xp"]} / {user_stats["level"] * 100}")
 
 # statistics dashboard
+def statistics_popup():
+    print("stats popup window")
 
+statistics_btn = tk.Button(root,text="Stats",font=("Helvetica",14),command=statistics_popup)
+statistics_btn.pack(side="right",padx=5)
 # background
 #distraction punishment system
 

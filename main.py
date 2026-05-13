@@ -60,9 +60,14 @@ def update_study_time(timer_label,pomodoro_popup):
     else:
         timer_on = False
         
-def stop_studying_time():
+def pause_studying_time():
     global timer_on
     timer_on = False
+
+def reset_studying_time(timer_label):
+    global timer
+    timer = 1 * 60
+    timer_label.config(text="Study time    1:00")
 
 #break functions
 def start_break_time(break_label,pomodoro_popup):
@@ -83,9 +88,15 @@ def update_break_time(break_label,pomodoro_popup):
     else:
         is_break_time = False
 
-def stop_break_time():
+def pause_break_time():
     global is_break_time
     is_break_time = False
+
+
+def reset_break_time(break_label):
+    global break_timer
+    break_timer = 1 * 60
+    break_label.config(text="Break time    1:00")
 
 def pomodoro_window():
     pomodoro_popup = tk.Toplevel(root)
@@ -100,17 +111,23 @@ def pomodoro_window():
     break_label.pack(pady=20)
 
     #buttons
-    start_timer = tk.Button(pomodoro_popup,text="Start Studying",command= lambda: start_studying_time(timer_label,pomodoro_popup))
-    start_timer.pack(side="left",padx=5)
+    start__studying_timer = tk.Button(pomodoro_popup,text="Start Studying",command= lambda: start_studying_time(timer_label,pomodoro_popup))
+    start__studying_timer.pack(side="left",padx=5)
 
-    stop_timer = tk.Button(pomodoro_popup,text="Stop Studying",command=stop_studying_time)
-    stop_timer.pack(side="left",padx=5)
+    pause_studying_timer = tk.Button(pomodoro_popup,text="Pause Studying",command=pause_studying_time)
+    pause_studying_timer.pack(side="left",padx=5)
 
-    start_break = tk.Button(pomodoro_popup, text="Start Break",command= lambda: start_break_time(break_label,pomodoro_popup))
-    start_break.pack(side="left",padx=5)
+    reset_studying_timer = tk.Button(pomodoro_popup,text="Reset Studying Timer",command= lambda: reset_studying_time(timer_label))
+    reset_studying_timer.pack(side="left",padx=5)
 
-    stop_break = tk.Button(pomodoro_popup, text="Stop Break", command=stop_break_time)
-    stop_break.pack(side="left",padx=5)
+    start_break_timer = tk.Button(pomodoro_popup, text="Start Break",command= lambda: start_break_time(break_label,pomodoro_popup))
+    start_break_timer.pack(side="left",padx=5)
+
+    pause_break_timer = tk.Button(pomodoro_popup, text="Pause Break", command=pause_break_time)
+    pause_break_timer.pack(side="left",padx=5)
+
+    reset_break_timer = tk.Button(pomodoro_popup,text="Reset Break Timer",command= lambda: reset_break_time(break_label))
+    reset_break_timer.pack(side="left",padx=5)
 
 pomodoro_btn = tk.Button(root, text="Pomodoro",command=pomodoro_window)
 pomodoro_btn.pack()

@@ -5,6 +5,7 @@ import os
 import datetime
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import pygetwindow as gw
 # user data
 DATA_FILE = "save_data.json"
 def load_data():
@@ -64,6 +65,7 @@ def start_studying_time(timer_label,pomodoro_popup):
     if timer_on:
         return
     timer_on = True
+    check_distractions()
     update_study_time(timer_label,pomodoro_popup)
 
 def update_study_time(timer_label,pomodoro_popup):
@@ -356,4 +358,38 @@ def statistics_popup():
 statistics_btn = tk.Button(root,text="Stats",font=("Helvetica",14),command=statistics_popup)
 statistics_btn.pack(side="right",padx=5)
 
+
+#distraction punishment system - in the background
+# check if the user tries to open distracting apps ( not implemented yet )
+# streak damage - lose xp and reset streak if they fail to check in or if they open distracting apps
+distraction_punished = False
+
+def check_distractions():
+    global distraction_punished
+
+    if not timer_on:
+        distraction_punished = False
+        return
+    
+    active_window = gw.getActiveWindow() # Gets the user's current window
+    if active_window is not None:
+        if root.title().lower() not in active_window.title.lower():
+            distraction_punished = True
+            add_xp(-20)
+
+            #popup warning to the user
+            warning = tk.Toplevel(root)
+            warning.title("DISTRACTION DETECTED")
+            tk.Label(warning,text="You switched away during study time!\n-20 XP",font=("Helvetica",18))
+            tk.Button(warning,text="OK",command=warning.destroy).pack(pady=10)
+        else:
+            distraction_punished = False # switched back, reset punishment system function
+    
+    root.after(3000,check_distractions)
+    
+
+def streak_damage():
+    add_xp(-15)   
+
+root.title("Procrastination App")
 root.mainloop()

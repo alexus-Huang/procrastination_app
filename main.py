@@ -59,6 +59,7 @@ timer = 1 * 60
 is_break_time = False
 break_timer = 1 * 60
 
+pomodoro_open = False
 #studying functions
 def start_studying_time(timer_label,pomodoro_popup):
     global timer_on
@@ -117,9 +118,19 @@ def reset_break_time(break_label):
     break_label.config(text="Break time    1:00")
 
 def pomodoro_window():
+    global pomodoro_open
+    pomodoro_open = True
     pomodoro_popup = tk.Toplevel(root)
     pomodoro_popup.title("Pomodoro Timer")
     pomodoro_popup.minsize(1000,500)
+
+    def on_close():
+        global pomodoro_open, timer_on
+        pomodoro_open = False
+        timer_on = False
+        pomodoro_popup.destroy()
+    
+    pomodoro_popup.protocol("WM_DELETE_WINDOW", on_close)
 
     #labels
     timer_label = tk.Label(pomodoro_popup,text="Study time   1:00",font=("Helvetica",24))
@@ -367,7 +378,7 @@ distraction_punished = False
 def check_distractions():
     global distraction_punished
 
-    if not timer_on:
+    if not timer_on or not pomodoro_open:
         distraction_punished = False
         return
     

@@ -7,4 +7,3 @@
 
 # bugs:
 # check_distraction still runs even after Pomodoro Timer is exited
-# check_distractions popup shows up when pomodoro timer is started

@@ -369,7 +369,6 @@ def statistics_popup():
 statistics_btn = tk.Button(root,text="Stats",font=("Helvetica",14),command=statistics_popup)
 statistics_btn.pack(side="right",padx=5)
 
-
 #distraction punishment system - in the background
 # check if the user tries to open distracting apps ( not implemented yet )
 # streak damage - lose xp and reset streak if they fail to check in or if they open distracting apps
@@ -389,7 +388,6 @@ def check_distractions():
         if not any(t in active_window.title.lower() for t in allowed_titles):
             if not distraction_punished:
                 distraction_punished = True
-                
                 add_xp(-20)
 
                 #popup warning to the user
@@ -402,7 +400,6 @@ def check_distractions():
     
     root.after(3000,check_distractions)
     
-
 def streak_damage():
     add_xp(-15)   
 

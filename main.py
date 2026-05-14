@@ -54,10 +54,10 @@ root.minsize(1000,500)
 # popup windows
 #pomodoro timer
 timer_on = False
-timer = 1 * 60
+study_duration = 1 * 60
 
 is_break_time = False
-break_timer = 1 * 60
+break_duration = 1 * 60
 
 pomodoro_open = False
 #studying functions
@@ -85,9 +85,11 @@ def pause_studying_time():
     timer_on = False
 
 def reset_studying_time(timer_label):
-    global timer
-    timer = 1 * 60
-    timer_label.config(text="Study time    1:00")
+    global timer, timer_on
+    timer_on = False
+    timer = study_duration   # reset to original set duration
+    minutes = timer // 60
+    timer_label.config(text=f"Study time    {minutes}:{00:02d}")
 
 #break functions
 def start_break_time(break_label,pomodoro_popup):
@@ -113,12 +115,14 @@ def pause_break_time():
     is_break_time = False
 
 def reset_break_time(break_label):
-    global break_timer
-    break_timer = 1 * 60
-    break_label.config(text="Break time    1:00")
+    global break_timer, is_break_time
+    is_break_time = False
+    break_timer = break_duration   # reset to original set duration
+    minutes = break_timer // 60
+    break_label.config(text=f"Break time    {minutes}:{00:02d}")
 
 def pomodoro_window():
-    global pomodoro_open
+    global pomodoro_open, timer, break_timer
     pomodoro_open = True
     pomodoro_popup = tk.Toplevel(root)
     pomodoro_popup.title("Pomodoro Timer")
@@ -132,6 +136,40 @@ def pomodoro_window():
     
     pomodoro_popup.protocol("WM_DELETE_WINDOW", on_close)
 
+    # Timer input fields
+    input_frame = tk.Frame(pomodoro_popup)
+    input_frame.pack(pady=40)
+
+    tk.Label(input_frame,text="Study (min):", font=("Arial",12)).grid(row=0, column=2, padx=5)
+    study_entry = tk.Entry(input_frame, width=5, font=("Arial",12))
+    study_entry.insert(0,"1") # default 1 min
+    study_entry.grid(row=0, column=1, padx=5)
+
+    tk.Label(input_frame,text="Break (min):", font=("Arial",12)).grid(row=0, column=2, padx=5)
+    break_entry = tk.Entry(input_frame, width=5, font=("Arial",12))
+    break_entry.insert(0,"1") # default 1 min
+    break_entry.grid(row=0, column=3, padx=5)
+
+    def apply_times():
+        global timer, break_timer, timer_on, is_break_time, study_duration, break_duration
+        timer_on = False
+        is_break_time = False
+        try:
+            study_mins = int(study_entry.get())
+            break_mins = int(break_entry.get())
+            timer = study_mins * 60
+            break_timer = break_mins * 60
+            study_duration = timer       # save originals
+            break_duration = break_timer
+            timer_label.config(text=f"Study time    {study_mins}:{00:02d}")
+            break_label.config(text=f"Break time    {break_mins}:{00:02d}")
+        except ValueError:
+            timer_label.config(text="Invalid input!")
+    
+    apply_btn = tk.Button(input_frame, text="Set Timers", command=apply_times, font=("Arial", 12))
+    apply_btn.grid(row=0, column=4, padx=10)
+
+    
     #labels
     timer_label = tk.Label(pomodoro_popup,text="Study time   1:00",font=("Helvetica",24))
     timer_label.pack(pady=20)

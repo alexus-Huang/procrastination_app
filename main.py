@@ -6,6 +6,7 @@ import datetime
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import pygetwindow as gw
+from tkinter import ttk
 # user data
 DATA_FILE = "save_data.json"
 def load_data():
@@ -216,25 +217,36 @@ focus_btn.pack(padx=5)
 
 # main page 
 # task list
+
 def add_task():
     task_text = entry.get()
     if task_text.strip() == "":
         return
+
+    # update total_tasks
+    global total_tasks
+    total_tasks += 1
+    update_progress()
     task_frame = tk.Frame(task_container, bg="lightgray",pady=5)
     task_frame.pack(fill="x",padx=10,pady=5)
 
     def on_check():
+        global completed_tasks, total_tasks
         if completed.get():
+            completed_tasks += 1
             add_xp(20)
             task_label.config(fg="gray")
             today = str(datetime.date.today())
             history_data["tasks_history"][today] = history_data["tasks_history"].get(today,0) + 1
             save_history(history_data)
         else:
+            completed_tasks -= 1
             add_xp(-20)
             task_label.config(fg="black")
             save_data(user_stats)
             update_ui()
+        
+        update_progress()
 
     completed = tk.BooleanVar()
     checkbox = tk.Checkbutton(
@@ -254,11 +266,20 @@ def add_task():
     )
     task_label.pack(side="left",padx=10)
 
+    def on_delete():
+        global total_tasks, completed_tasks
+        total_tasks -= 1
+        if completed.get():
+            completed_tasks -= 1    
+            add_xp(-20)
+        task_frame.destroy()
+        update_progress()
+    
     delete_button = tk.Button(
         task_frame,
         text="x",
         fg="red",
-        command=task_frame.destroy
+        command=on_delete
     )
     delete_button.pack(side="right",padx=10)
     entry.delete(0,tk.END)
@@ -278,7 +299,27 @@ add_button.pack(side="left")
 
 task_container = tk.Frame(root)
 task_container.pack(fill="both",expand=True)
+total_tasks = 0
+completed_tasks = 0
 
+# Progress bar
+progress_frame = tk.Frame(root)
+progress_frame.pack(fill="x", padx=20, pady=10)
+
+progress_bar = ttk.Progressbar(progress_frame, length = 400, mode="determinate")
+progress_bar.pack(fill="x")
+
+progress_label = tk.Label(progress_frame, text="0 / 0 tasks completed",fg="gray", font=("Arial",11))
+progress_label.pack()
+
+def update_progress():
+    if total_tasks == 0:
+        progress_bar['value'] = 0
+        progress_label.config(text="0 / 0 tasks completed")
+    else:
+        progress_bar["maximum"] = total_tasks
+        progress_bar["value"] = completed_tasks
+        progress_label.config(text=f"{completed_tasks} / {total_tasks} tasks completed")
 #daily streak system
 checkin_frame = tk.Frame(root)
 checkin_frame.pack(pady=5)

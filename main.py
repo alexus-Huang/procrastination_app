@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import pygetwindow as gw
 from tkinter import ttk
+
 # user data
 DATA_FILE = "save_data.json"
 def load_data():
@@ -170,7 +171,6 @@ def pomodoro_window():
     apply_btn = tk.Button(input_frame, text="Set Timers", command=apply_times, font=("Arial", 12))
     apply_btn.grid(row=0, column=4, padx=10)
 
-    
     #labels
     timer_label = tk.Label(pomodoro_popup,text="Study time   1:00",font=("Helvetica",24))
     timer_label.pack(pady=20)
@@ -216,8 +216,19 @@ focus_btn = tk.Button(root, text="Focus",font=("Arial",20),command=focus_mode)
 focus_btn.pack(padx=5)
 
 # main page 
-# task list
 
+# clock
+clock_display = tk.Label(root,text="",font=("Arial",18))
+clock_display.place(relx=1.0,rely=0.0, anchor="ne")
+
+def get_current_time(clock_display):
+    current_time = datetime.datetime.now()
+    str_current_time = current_time.strftime("%H:%M:%S")
+    clock_display.config(text=str_current_time)
+    root.after(1000,lambda:get_current_time(clock_display))
+
+get_current_time(clock_display)
+# task list
 def add_task():
     task_text = entry.get()
     if task_text.strip() == "":
@@ -449,8 +460,6 @@ statistics_btn = tk.Button(root,text="Stats",font=("Helvetica",14),command=stati
 statistics_btn.pack(side="right",padx=5)
 
 #distraction punishment system - in the background
-# check if the user tries to open distracting apps ( not implemented yet )
-# streak damage - lose xp and reset streak if they fail to check in or if they open distracting apps
 distraction_punished = False
 
 def check_distractions():

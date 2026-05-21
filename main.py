@@ -8,7 +8,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import pygetwindow as gw
 from tkinter import ttk
 
-# User data setup
+# User data setup - Cross-platform safe path matching
 APP_DIR = os.path.join(os.path.expanduser("~"), ".PomodoroApp")
 os.makedirs(APP_DIR, exist_ok=True)
 DATA_FILE = os.path.join(APP_DIR, "save_data.json")
@@ -61,14 +61,14 @@ root.minsize(1000, 500)
 # Global timer setups
 timer_on = False
 study_duration = 1 * 60
-timer = study_duration  # FIXED: Defined global variable
+timer = study_duration
 
 is_break_time = False
 break_duration = 1 * 60
-break_timer = break_duration  # FIXED: Defined global variable
+break_timer = break_duration
 
 pomodoro_open = False
-distraction_loop_running = False  # FIXED: Prevents background loop duplication
+distraction_loop_running = False
 
 # Studying functions
 def start_studying_time(timer_label, pomodoro_popup):
@@ -77,7 +77,6 @@ def start_studying_time(timer_label, pomodoro_popup):
         return
     timer_on = True
     
-    # FIXED: Only start one instance of the background checker loop
     if not distraction_loop_running:
         distraction_loop_running = True
         check_distractions()
@@ -86,6 +85,9 @@ def start_studying_time(timer_label, pomodoro_popup):
 
 def update_study_time(timer_label, pomodoro_popup):
     global timer_on, timer
+    if not pomodoro_open:
+        timer_on = False
+        return
     if timer_on and timer > 0:
         timer -= 1
         minutes = timer // 60
@@ -104,7 +106,7 @@ def reset_studying_time(timer_label):
     timer_on = False
     timer = study_duration   
     minutes = timer // 60
-    timer_label.config(text=f"Study time    {minutes}:00")  # FIXED: Corrected formatting syntax
+    timer_label.config(text=f"Study time    {minutes}:00")
 
 # Break functions
 def start_break_time(break_label, pomodoro_popup):
@@ -116,6 +118,9 @@ def start_break_time(break_label, pomodoro_popup):
 
 def update_break_time(break_label, pomodoro_popup):
     global is_break_time, break_timer
+    if not pomodoro_open:
+        is_break_time = False
+        return
     if is_break_time and break_timer > 0:
         break_timer -= 1
         minutes = break_timer // 60
@@ -134,7 +139,7 @@ def reset_break_time(break_label):
     is_break_time = False
     break_timer = break_duration   
     minutes = break_timer // 60
-    break_label.config(text=f"Break time    {minutes}:00")  # FIXED: Corrected formatting syntax
+    break_label.config(text=f"Break time    {minutes}:00")
 
 def pomodoro_window():
     global pomodoro_open, timer, break_timer
@@ -154,11 +159,9 @@ def pomodoro_window():
     
     pomodoro_popup.protocol("WM_DELETE_WINDOW", on_close)
 
-    # Timer input fields
     input_frame = tk.Frame(pomodoro_popup)
     input_frame.pack(pady=40)
 
-    # FIXED: Repositioned overlapping grid columns (0, 1, 2, 3, 4)
     tk.Label(input_frame, text="Study (min):", font=("Arial", 12)).grid(row=0, column=0, padx=5)
     study_entry = tk.Entry(input_frame, width=5, font=("Arial", 12))
     study_entry.insert(0, "1") 
@@ -194,7 +197,6 @@ def pomodoro_window():
     break_label = tk.Label(pomodoro_popup, text="Break time   1:00", font=("Helvetica", 24))
     break_label.pack(pady=20)
 
-    # Buttons
     tk.Button(pomodoro_popup, text="Start Studying", command=lambda: start_studying_time(timer_label, pomodoro_popup)).pack(side="left", padx=5)
     tk.Button(pomodoro_popup, text="Pause Studying", command=pause_studying_time).pack(side="left", padx=5)
     tk.Button(pomodoro_popup, text="Reset Studying Timer", command=lambda: reset_studying_time(timer_label)).pack(side="left", padx=5)
@@ -363,7 +365,7 @@ def add_xp(amount):
         user_stats["level"] += 1
         print(f"Level Up! Now level {user_stats['level']}")
     elif user_stats["xp"] < 0:
-        user_stats["xp"] = 0  # Clip XP floor at 0
+        user_stats["xp"] = 0
         
     save_data(user_stats)
     update_ui()
@@ -428,6 +430,12 @@ def statistics_popup():
     canvas.draw()
     canvas.get_tk_widget().pack(fill="both", expand=True)
 
+    def close_stats():
+        plt.close(fig)
+        stats_window.destroy()
+
+    stats_window.protocol("WM_DELETE_WINDOW", close_stats)
+
 statistics_btn = tk.Button(root, text="Stats", font=("Helvetica", 14), command=statistics_popup)
 statistics_btn.pack(side="right", padx=5)
 
@@ -437,7 +445,6 @@ distraction_punished = False
 def check_distractions():
     global distraction_punished, distraction_loop_running
 
-    # FIXED: Break loop seamlessly if user turns off timers or window is deleted
     if not timer_on or not pomodoro_open:
         distraction_punished = False
         distraction_loop_running = False

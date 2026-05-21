@@ -20,5 +20,5 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: clicker_game
+          name: pomodoro_app
           path: dist/main.exe

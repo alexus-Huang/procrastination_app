@@ -9,7 +9,7 @@ import pygetwindow as gw
 from tkinter import ttk
 
 # User data setup
-APP_DIR = os.path.join(os.getenv("APPDATA"), "PomodoroApp")
+APP_DIR = os.path.join(os.path.expanduser("~"), ".PomodoroApp")
 os.makedirs(APP_DIR, exist_ok=True)
 DATA_FILE = os.path.join(APP_DIR, "save_data.json")
 
